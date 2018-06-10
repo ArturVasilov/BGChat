@@ -1,7 +1,9 @@
 package ru.androidacademy.bgchat.view;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -32,13 +34,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        FragmentTransaction fragmentManager = getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.content, HobbyListFragment.newInstance());
+
+        fragmentManager.commit();
+
         app = (App) getApplicationContext();
         if (app.getAuthRepo().getCurrentUser() == null) {
             startActivityForResult(app.getAuthRepo().getIntent(), RC_SIGN_IN);
         } else {
 
             if (mBluetoothController == null) {
-                mBluetoothController = new BluetoothController(false, this, new BluetoothController.Callback() {
+                mBluetoothController = new BluetoothController(true, this, new BluetoothController.Callback() {
                     @Override
                     public void discoveryFinishedCallback(List<String> DiscoveredDeviceList) {
                         Log.d(BLUETOOTH_TAG, "in discoveryFinishedCallback");
@@ -60,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            mBluetoothController.getBluetoothAdapter().setName("lak 1234567");
             mBluetoothController.enableDeviceRequest();
             mBluetoothController.discovery();
 
@@ -83,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loginPostProcess() {
+
         // TODO: add bluetooth self hash
         String id = "bluetooth id";
         FirebaseUser firebaseUser = app.getAuthRepo().getCurrentUser();
