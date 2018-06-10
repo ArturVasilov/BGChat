@@ -17,8 +17,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.androidacademy.bgchat.Bluetooth.AeSimpleSHA1;
-
 /**
  * Created by User on 10.06.2018.
  */
@@ -125,14 +123,14 @@ public class BluetoothController {
         return bluetoothAdapter.enable();
     }
 
-    public boolean Disable() {
+    public boolean destroy() {
 
         LocalActivity.unregisterReceiver(bluetoothBroadcastReceiver);
 
         return bluetoothAdapter.disable();
     }
 
-    public void EnableDeviceRequest () {
+    public void enableDeviceRequest() {
 
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -162,7 +160,7 @@ public class BluetoothController {
 
     }
 
-    public boolean Discovery() {
+    public boolean discovery() {
 
         checkBTPermissions();
 
