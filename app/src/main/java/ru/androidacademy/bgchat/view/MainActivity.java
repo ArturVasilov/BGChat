@@ -1,6 +1,5 @@
 package ru.androidacademy.bgchat.view;
 
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -20,6 +19,7 @@ import ru.androidacademy.bgchat.R;
 import ru.androidacademy.bgchat.model.User;
 
 import static ru.androidacademy.bgchat.Bluetooth.BluetoothController.BLUETOOTH_TAG;
+import static ru.androidacademy.bgchat.bluetooth.BluetoothController.BLUETOOTH_TAG;
 
 public class MainActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 3212;
@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            mBluetoothController.getBluetoothAdapter().setName("lak 1234567");
             mBluetoothController.enableDeviceRequest();
             mBluetoothController.discovery();
 
@@ -92,9 +91,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loginPostProcess() {
-
-        // TODO: add bluetooth self hash
-        String id = "bluetooth id";
+        String id = mBluetoothController.getSelfHash();
+        if (id == null) {
+            // TODO what to do
+            throw new RuntimeException("hash id is null");
+        }
         FirebaseUser firebaseUser = app.getAuthRepo().getCurrentUser();
         List<String> hobbies = new ArrayList<>();
         hobbies.add("Java");
