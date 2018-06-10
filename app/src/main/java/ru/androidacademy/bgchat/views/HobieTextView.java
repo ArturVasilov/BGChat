@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 
 import ru.androidacademy.bgchat.R;
 
@@ -74,7 +75,7 @@ public class HobieTextView extends AppCompatTextView {
         this.isSelected = isSelected;
 
         if (onSelectionChangedListener != null) {
-            onSelectionChangedListener.onSelectionChanged(isSelected);
+            onSelectionChangedListener.onSelectionChanged(this, isSelected);
         }
     }
 
@@ -88,6 +89,6 @@ public class HobieTextView extends AppCompatTextView {
     }
 
     public interface OnSelectionChangedListener {
-        void onSelectionChanged(boolean isSelected);
+        void onSelectionChanged(View view, boolean isSelected);
     }
 }

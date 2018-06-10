@@ -3,10 +3,12 @@ package ru.androidacademy.bgchat.view;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +32,10 @@ public class HobbyListFragment extends Fragment {
 
     //private final static String ARG_HOBBY_LIST = "args:hobby_list";
 
+    private final static String HOBBY_TAG = "HobbyListFragment";
+
     private RecyclerView recyclerView;
+    private FloatingActionButton acceptFab;
 
     private OnFragmentInteractionListener mListener;
 
@@ -65,13 +70,20 @@ public class HobbyListFragment extends Fragment {
         //RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(),2);
         recyclerView.setLayoutManager(layoutManager);
 
-        HobbiesAdapter hobbiesAdapter = new HobbiesAdapter(new HobbiesAdapter.OnItemClickListener() {
-            @Override
-            public void onClick(String hobby, int position) {
-                Toast.makeText(getContext(), hobby, Toast.LENGTH_SHORT);
-            }
-        }, getHobbyList());
+        HobbiesAdapter hobbiesAdapter = new HobbiesAdapter(getHobbyList());
         recyclerView.setAdapter(hobbiesAdapter);
+
+        acceptFab = rootView.findViewById(R.id.hobbyAcceptFab);
+        acceptFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "Accept!", Toast.LENGTH_SHORT).show();
+                for (String hobby:
+                     hobbiesAdapter.getSelectedHobbyList()) {
+                    Log.d(HOBBY_TAG, hobby);
+                }
+            }
+        });
 
         return rootView;
 
@@ -83,11 +95,30 @@ public class HobbyListFragment extends Fragment {
         hobbyList.add("Dota");
         hobbyList.add("Verilog");
         hobbyList.add("Drinking");
-        hobbyList.add("sdjkfjkdsfhdhfdhfhdghfdgfgdgfdghfgjdgfj");
-        hobbyList.add("kkjkjjfgjjfjdfjkdjkgkdkgktiguugkdjgkjdjkrk");
-        hobbyList.add("hsdsdhdhdhjsjsjdhjsjsjdhdhsjsjdhsjdjjdjs");
-        hobbyList.add("lkskeiekdkjkdjkdjksdkjsdjsdjsdjsdjjsdkjks");
-        hobbyList.add("jfjksfhshfiieieoioioieoidfhfhskjfkjeuifkewu");
+        hobbyList.add("Tequila with limon");
+        hobbyList.add("Girls");
+        hobbyList.add("Cycling");
+        hobbyList.add("Fishing");
+        hobbyList.add("Travelling");
+        hobbyList.add("Android Meetups");
+        hobbyList.add("Football");
+        hobbyList.add("Embedded development");
+        hobbyList.add("Books");
+        hobbyList.add("Learning foreign languages");
+        hobbyList.add("Machine Learning");
+        hobbyList.add("Auto");
+        hobbyList.add("Films and serials");
+        hobbyList.add("Rock music");
+        hobbyList.add("Folk music");
+        hobbyList.add("Rocket science");
+        hobbyList.add("Software architecture development");
+        hobbyList.add("Cuban cigars");
+        hobbyList.add("Cooking");
+        hobbyList.add("Does something shit");
+        hobbyList.add("Sport betting");
+        hobbyList.add("Sleeping");
+        hobbyList.add("Kitties");
+        hobbyList.add("Motobikes");
 
         return hobbyList;
     }

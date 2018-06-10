@@ -8,10 +8,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ru.androidacademy.bgchat.R;
+import ru.androidacademy.bgchat.views.HobieTextView;
 
 /**
  * Created by User on 10.06.2018.
@@ -21,20 +25,11 @@ public class HobbiesAdapter extends RecyclerView.Adapter<HobbiesAdapter.ItemHold
 
 
     private List<String> hobbyList;
-    private OnItemClickListener onItemClickListener;
+    private List<String> selectedHobbyList;
 
-    private final View.OnClickListener internalClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            String hobby = (String) view.getTag();
-            int position = hobbyList.indexOf(hobby);
-            onItemClickListener.onClick(hobby, position);
-        }
-    };
-
-    public HobbiesAdapter(OnItemClickListener onItemClickListener, List<String> hobbyList) {
-        this.onItemClickListener = onItemClickListener;
+    public HobbiesAdapter(List<String> hobbyList) {
         this.hobbyList = hobbyList;
+        selectedHobbyList = new ArrayList<>();
     }
 
     @NonNull
@@ -48,8 +43,11 @@ public class HobbiesAdapter extends RecyclerView.Adapter<HobbiesAdapter.ItemHold
     @Override
     public void onBindViewHolder(@NonNull ItemHolder holder, int position) {
         String hobby = hobbyList.get(position);
-        holder.itemView.setTag(hobby);
-        holder.button.setText(hobby);
+        holder.textView.setText(hobby);
+    }
+
+    public List<String> getSelectedHobbyList() {
+        return selectedHobbyList;
     }
 
     @Override
@@ -57,18 +55,21 @@ public class HobbiesAdapter extends RecyclerView.Adapter<HobbiesAdapter.ItemHold
         return hobbyList.size();
     }
 
-    public interface OnItemClickListener {
-        public void onClick(String hobby, int position);
-    }
-
     class ItemHolder extends RecyclerView.ViewHolder {
 
-        public Button button;
+        public HobieTextView textView;
 
         public ItemHolder(View itemView) {
             super(itemView);
-            button = itemView.findViewById(R.id.hobbyButton);
-            button.setOnClickListener(internalClickListener);
+            textView = itemView.findViewById(R.id.hobbyButton);
+            textView.setOnSelectionChangedListener((view, isSelected) -> {
+                String hobby = textView.getText().toString();
+                if (isSelected) {
+                    selectedHobbyList.add(hobby);
+                } else {
+                    selectedHobbyList.remove(hobby);
+                }
+            });
         }
 
     }

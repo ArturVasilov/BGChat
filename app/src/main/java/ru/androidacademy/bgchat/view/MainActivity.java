@@ -8,17 +8,14 @@ import android.util.Log;
 
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.androidacademy.bgchat.App;
-import ru.androidacademy.bgchat.Bluetooth.BluetoothController;
+import ru.androidacademy.bgchat.bluetooth.BluetoothController;
 import ru.androidacademy.bgchat.R;
 import ru.androidacademy.bgchat.model.User;
 
-import static ru.androidacademy.bgchat.Bluetooth.BluetoothController.BLUETOOTH_TAG;
 import static ru.androidacademy.bgchat.bluetooth.BluetoothController.BLUETOOTH_TAG;
 
 public class MainActivity extends AppCompatActivity {
@@ -62,14 +59,10 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
 
-            try {
-                Log.d(BLUETOOTH_TAG, "Self bluetooth hash: " + mBluetoothController.getSelfHash());
-            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
+            Log.d(BLUETOOTH_TAG, "Self bluetooth hash: " + mBluetoothController.getSelfHash());
 
-            mBluetoothController.enableDeviceRequest();
-            mBluetoothController.discovery();
+            //mBluetoothController.enableDeviceRequest();
+            //mBluetoothController.discovery();
 
             // TODO : show chats
         }
