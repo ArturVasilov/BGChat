@@ -1,4 +1,4 @@
-package ru.androidacademy.bgchat.Bluetooth;
+package ru.androidacademy.bgchat.bluetooth;
 
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
@@ -26,21 +26,7 @@ public class BluetoothController {
     public static final String BLUETOOTH_TAG = "Bluetooth";
     public static final int BLUETOOTH_ENABLE_REQUEST = 123;
 
-    public interface Callback {
-        void discoveryFinishedCallback(List<String> DiscoveredDeviceList);
-        void discoveryFoundedDeviceCallback(String deviceHash);
-    }
-
-    private Callback discoveryCallback;
-    private BluetoothAdapter bluetoothAdapter;
-    private AppCompatActivity LocalActivity;
-    private BroadcastReceiver bluetoothBroadcastReceiver;
-    private IntentFilter bluetoothIntentFilter;
-
-    private boolean DEBUG_MODE = true;
-    private List<String> mDiscoveredDevicesList;
-
-    public BluetoothController (boolean debug_mode, AppCompatActivity activity, Callback callback) {
+    public BluetoothController(boolean debug_mode, AppCompatActivity activity, Callback callback) {
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         DEBUG_MODE = debug_mode;
@@ -61,7 +47,10 @@ public class BluetoothController {
 
                         String devName = device.getName();
                         String devMAC = device.getAddress();
-                        String devSHA1 = AeSimpleSHA1.SHA1(devMAC);
+                        String devSHA1 = "0";
+                        if (devName != null) {
+                            devSHA1 = AeSimpleSHA1.SHA1(devName);
+                        }
 
                         if (DEBUG_MODE) {
                             Log.d(BLUETOOTH_TAG, "Найдено устройство: " + devName + " " + devMAC +
@@ -78,15 +67,13 @@ public class BluetoothController {
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
-                }
-                else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)) {
+                } else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)) {
                     if (DEBUG_MODE) {
                         Log.d(BLUETOOTH_TAG, "START DISCOVERY");
                     }
 
                     mDiscoveredDevicesList.clear();
-                }
-                else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
+                } else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
                     if (DEBUG_MODE) {
                         Log.d(BLUETOOTH_TAG, "FINISH DISCOVERY. Founded device hashes: ");
 
@@ -112,8 +99,21 @@ public class BluetoothController {
 
     }
 
-    public boolean isEnabled () {
+    private Callback discoveryCallback;
+    private BluetoothAdapter bluetoothAdapter;
+    private AppCompatActivity LocalActivity;
+    private BroadcastReceiver bluetoothBroadcastReceiver;
+    private IntentFilter bluetoothIntentFilter;
+
+    private boolean DEBUG_MODE = true;
+    private List<String> mDiscoveredDevicesList;
+
+    public boolean isEnabled() {
         return bluetoothAdapter.isEnabled();
+    }
+
+    public BluetoothAdapter getBluetoothAdapter() {
+        return bluetoothAdapter;
     }
 
     public boolean Enable() {
@@ -139,8 +139,14 @@ public class BluetoothController {
 
     }
 
-    public BluetoothAdapter getBluetoothAdapter () {
-        return bluetoothAdapter;
+    public String getSelfHash() {
+        try {
+            enableDeviceRequest();
+            return AeSimpleSHA1.SHA1(bluetoothAdapter.getName());
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @TargetApi(23)
@@ -152,12 +158,6 @@ public class BluetoothController {
                 LocalActivity.requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1001);
             }
         }
-    }
-
-    public String getSelfHash() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-
-        return AeSimpleSHA1.SHA1(bluetoothAdapter.getAddress());
-
     }
 
     public boolean discovery() {
@@ -178,13 +178,18 @@ public class BluetoothController {
         if (DEBUG_MODE) {
             if (discoveryStatus) {
                 Log.d(BLUETOOTH_TAG, "Запуск обнаружения");
-            }
-            else {
+            } else {
                 Log.d(BLUETOOTH_TAG, "Неудача запуска обнаружения");
             }
         }
 
         return discoveryStatus;
+    }
+
+    public interface Callback {
+        void discoveryFinishedCallback(List<String> DiscoveredDeviceList);
+
+        void discoveryFoundedDeviceCallback(String deviceHash);
     }
 
 }
