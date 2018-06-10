@@ -1,4 +1,4 @@
-package ru.androidacademy.bgchat.Bluetooth;
+package ru.androidacademy.bgchat.bluetooth;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;

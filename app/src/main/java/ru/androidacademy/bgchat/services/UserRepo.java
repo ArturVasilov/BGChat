@@ -27,39 +27,35 @@ public class UserRepo {
                 .child(user.getId())
                 .setValue(user)
                 .addOnSuccessListener(aVoid -> Log.i(TAG, "writeUser: success"))
-                .addOnFailureListener(
-                        e -> {
-                            Log.w(TAG, "wireUser: failure");
-                            Log.w(TAG, e.getMessage());
-                        });
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "wireUser: failure");
+                    Log.w(TAG, e.getMessage());
+                });
     }
 
     public void readUser(String id, Consumer<User> consumer) {
         db.getReference()
                 .child(REF_USERS)
                 .child(id)
-                .addListenerForSingleValueEvent(
-                        new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                User user = dataSnapshot.getValue(User.class);
-                                consumer.accept(user);
-                            }
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        User user = dataSnapshot.getValue(User.class);
+                        consumer.accept(user);
+                    }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-                            }
-                        });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
     }
 
     public void writeIfNotExists(User newUser) {
-        readUser(
-                newUser.getId(),
-                user -> {
-                    if (user == null) {
-                        writeUser(newUser);
-                    }
-                });
+        readUser(newUser.getId(), user -> {
+            if (user == null) {
+                writeUser(newUser);
+            }
+        });
     }
 
 }

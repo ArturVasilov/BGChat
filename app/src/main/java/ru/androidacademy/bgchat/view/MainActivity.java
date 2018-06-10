@@ -4,20 +4,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.androidacademy.bgchat.App;
-import ru.androidacademy.bgchat.Bluetooth.BluetoothController;
 import ru.androidacademy.bgchat.R;
+import ru.androidacademy.bgchat.bluetooth.BluetoothController;
 import ru.androidacademy.bgchat.model.User;
 
-import static ru.androidacademy.bgchat.Bluetooth.BluetoothController.BLUETOOTH_TAG;
+import static ru.androidacademy.bgchat.bluetooth.BluetoothController.BLUETOOTH_TAG;
 
 public class MainActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 3212;
@@ -32,37 +31,34 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mBluetoothController = new BluetoothController(false, this, new BluetoothController.Callback() {
+            @Override
+            public void discoveryFinishedCallback(List<String> DiscoveredDeviceList) {
+                Log.d(BLUETOOTH_TAG, "in discoveryFinishedCallback");
+                for (String element : DiscoveredDeviceList) {
+                    Log.d(BLUETOOTH_TAG, ": " + element);
+                }
+            }
+
+            @Override
+            public void discoveryFoundedDeviceCallback(String deviceHash) {
+                Log.d(BLUETOOTH_TAG, "FOUND DEVICE: " + deviceHash);
+                app.getUserRepo().readUser(deviceHash, user -> {
+                    if (user != null) {
+                        Toast.makeText(MainActivity.this, "Founded: " + user.getName(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
         app = (App) getApplicationContext();
         if (app.getAuthRepo().getCurrentUser() == null) {
             startActivityForResult(app.getAuthRepo().getIntent(), RC_SIGN_IN);
         } else {
-
-            if (mBluetoothController == null) {
-                mBluetoothController = new BluetoothController(false, this, new BluetoothController.Callback() {
-                    @Override
-                    public void discoveryFinishedCallback(List<String> DiscoveredDeviceList) {
-                        Log.d(BLUETOOTH_TAG, "in discoveryFinishedCallback");
-                        for (String element : DiscoveredDeviceList) {
-                            Log.d(BLUETOOTH_TAG, ": " + element);
-                        }
-                    }
-
-                    @Override
-                    public void discoveryFoundedDeviceCallback(String deviceHash) {
-                        Log.d(BLUETOOTH_TAG, "FOUND DEVICE: " + deviceHash);
-                    }
-                });
-            }
-
-            try {
-                Log.d(BLUETOOTH_TAG, "Self bluetooth hash: " + mBluetoothController.getSelfHash());
-            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
+            Log.d(BLUETOOTH_TAG, "Self bluetooth hash: " + mBluetoothController.getSelfHash());
 
             mBluetoothController.enableDeviceRequest();
             mBluetoothController.discovery();
-
             // TODO : show chats
         }
     }
@@ -83,14 +79,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loginPostProcess() {
-        // TODO: add bluetooth self hash
-        String id = "bluetooth id";
+        String id = mBluetoothController.getSelfHash();
+        if (id == null) {
+            // TODO what to do
+            throw new RuntimeException("hash id is null");
+        }
         FirebaseUser firebaseUser = app.getAuthRepo().getCurrentUser();
         List<String> hobbies = new ArrayList<>();
         hobbies.add("Java");
         hobbies.add("Android");
         User user = new User(firebaseUser.getEmail(), id, firebaseUser.getDisplayName(), hobbies);
-        app.getUserRepo().writeIfNotExists(user);
+        app.getUserRepo().writeUser(user);
     }
 
     @Override

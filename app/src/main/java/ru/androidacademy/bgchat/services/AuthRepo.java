@@ -23,8 +23,7 @@ public class AuthRepo {
     public Intent getIntent() {
         return AuthUI.getInstance()
                 .createSignInIntentBuilder()
-                .setAvailableProviders(
-                        Collections.singletonList(new AuthUI.IdpConfig.GoogleBuilder().build()))
+                .setAvailableProviders(Collections.singletonList(new AuthUI.IdpConfig.GoogleBuilder().build()))
                 .build();
     }
 }
