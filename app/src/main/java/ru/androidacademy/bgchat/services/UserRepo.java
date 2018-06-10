@@ -17,8 +17,8 @@ public class UserRepo {
 
     private final FirebaseDatabase db;
 
-    public UserRepo(FirebaseDatabase db) {
-        this.db = db;
+    public UserRepo(FirebaseDatabase firebaseDatabase) {
+        db = firebaseDatabase;
     }
 
     public void writeUser(User user) {
@@ -57,5 +57,4 @@ public class UserRepo {
             }
         });
     }
-
 }

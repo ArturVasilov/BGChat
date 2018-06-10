@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseUser;
 
@@ -26,48 +28,53 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private App app;
-
     private BluetoothController mBluetoothController;
+    private User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FragmentTransaction fragmentManager = getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.content, HobbyListFragment.newInstance());
 
-        fragmentManager.commit();
+
+        mBluetoothController = new BluetoothController(false, this, new BluetoothController.Callback() {
+            @Override
+            public void discoveryFinishedCallback(List<String> DiscoveredDeviceList) {
+                Log.d(BLUETOOTH_TAG, "in discoveryFinishedCallback");
+                for (String element : DiscoveredDeviceList) {
+                    Log.d(BLUETOOTH_TAG, ": " + element);
+                }
+            }
+
+            @Override
+            public void discoveryFoundedDeviceCallback(String deviceHash) {
+                Log.d(BLUETOOTH_TAG, "FOUND DEVICE: " + deviceHash);
+                app.getUserRepo().readUser(deviceHash, findedUser -> {
+                    if (findedUser != null) {
+                        Toast.makeText(MainActivity.this, "Founded: " + findedUser.getName(), Toast.LENGTH_SHORT).show();
+                        TextView textView = findViewById(R.id.user_text);
+                        textView.setText(findedUser.getName());
+                        textView.setOnClickListener(view -> {
+                            String room = app.getRoomRepo().createRoom(currentUser, findedUser);
+                            RoomActivity.start(MainActivity.this, room, currentUser.getId());
+                        });
+
+                    }
+                });
+            }
+        });
 
         app = (App) getApplicationContext();
         if (app.getAuthRepo().getCurrentUser() == null) {
             startActivityForResult(app.getAuthRepo().getIntent(), RC_SIGN_IN);
         } else {
-
-            if (mBluetoothController == null) {
-                mBluetoothController = new BluetoothController(true, this, new BluetoothController.Callback() {
-                    @Override
-                    public void discoveryFinishedCallback(List<String> DiscoveredDeviceList) {
-                        Log.d(BLUETOOTH_TAG, "in discoveryFinishedCallback");
-                        for (String element : DiscoveredDeviceList) {
-                            Log.d(BLUETOOTH_TAG, ": " + element);
-                        }
-                    }
-
-                    @Override
-                    public void discoveryFoundedDeviceCallback(String deviceHash) {
-                        Log.d(BLUETOOTH_TAG, "FOUND DEVICE: " + deviceHash);
-                    }
-                });
-            }
-
             Log.d(BLUETOOTH_TAG, "Self bluetooth hash: " + mBluetoothController.getSelfHash());
             Log.d(BLUETOOTH_TAG, "Self bluetooth addr: " + mBluetoothController.getSelfBluetoothMacAddress());
 
+            app.getUserRepo().readUser(mBluetoothController.getSelfHash(), user -> currentUser = user);
             mBluetoothController.enableDeviceRequest();
             mBluetoothController.discovery();
-
             // TODO : show chats
         }
     }
@@ -88,17 +95,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loginPostProcess() {
+        FragmentTransaction fragmentManager = getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.content, HobbyListFragment.newInstance());
+
+        fragmentManager.commit();
         String id = mBluetoothController.getSelfHash();
         if (id == null) {
             // TODO what to do
             throw new RuntimeException("hash id is null");
         }
         FirebaseUser firebaseUser = app.getAuthRepo().getCurrentUser();
-        List<String> hobbies = new ArrayList<>();
-        hobbies.add("Java");
-        hobbies.add("Android");
-        User user = new User(firebaseUser.getEmail(), id, firebaseUser.getDisplayName(), hobbies);
-        app.getUserRepo().writeIfNotExists(user);
+        currentUser = new User(firebaseUser.getEmail(), id, firebaseUser.getDisplayName());
+        app.getUserRepo().writeUser(currentUser);
     }
 
     @Override
