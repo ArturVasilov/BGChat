@@ -1,5 +1,6 @@
 package ru.androidacademy.bgchat.view;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -8,6 +9,8 @@ import android.util.Log;
 
 import com.google.firebase.auth.FirebaseUser;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,9 +63,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
             Log.d(BLUETOOTH_TAG, "Self bluetooth hash: " + mBluetoothController.getSelfHash());
+            Log.d(BLUETOOTH_TAG, "Self bluetooth addr: " + mBluetoothController.getSelfBluetoothMacAddress());
 
-            //mBluetoothController.enableDeviceRequest();
-            //mBluetoothController.discovery();
+            mBluetoothController.enableDeviceRequest();
+            mBluetoothController.discovery();
 
             // TODO : show chats
         }
