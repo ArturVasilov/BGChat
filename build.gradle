@@ -34,6 +34,14 @@ subprojects {
             force "com.android.support:support-annotations:${project.property('supportLib.version')}"
             force "com.android.support:support-core-ui:${project.property('supportLib.version')}"
             force "com.android.support:support-media-compat:${project.property('supportLib.version')}"
+            force "com.android.support:support-fragment:${project.property('supportLib.version')}"
+            force "com.android.support:appcompat-v7:${project.property('supportLib.version')}"
+            force "android.arch.lifecycle:runtime:${project.property('arch.version')}"
+            force "android.arch.core:runtime:${project.property('arch.version')}"
+            force "android.arch.lifecycle:viewmodel:${project.property('arch.version')}"
+            force "android.arch.lifecycle:common:${project.property('arch.version')}"
+            force "android.arch.core:common:${project.property('arch.version')}"
+            force "android.arch.lifecycle:livedata-core:${project.property('arch.version')}"
         }
     }
 }
