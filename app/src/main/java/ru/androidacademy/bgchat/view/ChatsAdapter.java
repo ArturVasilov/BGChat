@@ -11,7 +11,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.support.v7.widget.RecyclerView.Adapter;
 import ru.androidacademy.bgchat.R;
 import ru.androidacademy.bgchat.model.User;
 import ru.androidacademy.bgchat.views.HobieTextView;
@@ -35,8 +34,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ItemHolder> 
         }
     };
 
-    public ChatsAdapter(List<User> chatList, OnItemClickListener onItemClickListener) {
-        this.chatList = chatList;
+    public ChatsAdapter(OnItemClickListener onItemClickListener) {
+        this.chatList = new ArrayList<>();
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -49,8 +48,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ItemHolder> 
     }
 
     public void addChat(User chat) {
-        chatList.add(chat);
-        notifyDataSetChanged();
+        if (!chatList.contains(chat)) {
+            chatList.add(chat);
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -74,7 +75,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ItemHolder> 
     }
 
     public interface OnItemClickListener {
-        public void onClick(User chat, int position);
+        void onClick(User chat, int position);
     }
 
     class ItemHolder extends RecyclerView.ViewHolder {
