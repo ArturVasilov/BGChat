@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">BGChat</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hobby_greetings_text">Отметьте свои интересы, чтобы другим людям легче было вас найти</string>
 </resources>

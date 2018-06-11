@@ -23,11 +23,10 @@ import ru.androidacademy.bgchat.views.HobieTextView;
 
 public class HobbiesAdapter extends RecyclerView.Adapter<HobbiesAdapter.ItemHolder> {
 
+    private final List<String> hobbyList;
+    private final List<String> selectedHobbyList;
 
-    private List<String> hobbyList;
-    private List<String> selectedHobbyList;
-
-    public HobbiesAdapter(List<String> hobbyList) {
+    HobbiesAdapter(List<String> hobbyList) {
         this.hobbyList = hobbyList;
         selectedHobbyList = new ArrayList<>();
     }
@@ -57,9 +56,9 @@ public class HobbiesAdapter extends RecyclerView.Adapter<HobbiesAdapter.ItemHold
 
     class ItemHolder extends RecyclerView.ViewHolder {
 
-        public HobieTextView textView;
+        final HobieTextView textView;
 
-        public ItemHolder(View itemView) {
+        ItemHolder(View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.hobbyButton);
             textView.setOnSelectionChangedListener((view, isSelected) -> {

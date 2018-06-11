@@ -25,7 +25,8 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
 
     private App app;
     private User currentUser;
-    private BluetoothController.Callback callback = new BluetoothController.Callback() {
+
+    private final BluetoothController.Callback callback = new BluetoothController.Callback() {
         @Override
         public boolean requestPermission() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
             });
         }
     };
+
     private BluetoothController bluetoothController;
 
     @Override
@@ -74,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
         if (app.getAuthRepo().getCurrentUser() == null) {
             startActivityForResult(app.getAuthRepo().getIntent(), RC_SIGN_IN);
         } else {
-
             Log.d(BLUETOOTH_TAG, "Self bluetooth hash: " + bluetoothController.getSelfHash());
             Log.d(BLUETOOTH_TAG, "Self bluetooth addr: " + bluetoothController.getSelfBluetoothMacAddress());
 
