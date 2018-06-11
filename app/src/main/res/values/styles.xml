@@ -8,4 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="HobbyStyle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:textColor">#aa333333</item>
+        <item name="android:background">@drawable/button_background_unselected</item>
+    </style>
+
 </resources>
