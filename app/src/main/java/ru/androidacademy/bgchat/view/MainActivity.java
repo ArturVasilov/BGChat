@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.TextView;
 
 import ru.androidacademy.bgchat.App;
 import ru.androidacademy.bgchat.R;
@@ -40,7 +41,8 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
                 int permissionCheck = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
                 permissionCheck += checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION);
                 if (permissionCheck != 0) {
-                    requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1001);
+                    requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1001);
                     return false;
                 }
             }
@@ -85,7 +87,10 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
             Log.d(BLUETOOTH_TAG, "Self bluetooth hash: " + bluetoothController.getSelfHash());
             Log.d(BLUETOOTH_TAG, "Self bluetooth addr: " + bluetoothController.getSelfBluetoothMacAddress());
 
-            app.getUserRepo().readUser(bluetoothController.getSelfHash(), user -> currentUser = user);
+            app.getUserRepo().readUser(bluetoothController.getSelfHash(), user -> {
+                currentUser = user;
+                ((TextView) findViewById(R.id.current_user)).setText(user.getName());
+            });
             discovery();
             initRecyclerView();
         }
@@ -144,7 +149,10 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
                 .remove(fragment)
                 .commit();
 
-        app.getUserRepo().readUser(bluetoothController.getSelfHash(), user -> currentUser = user);
+        app.getUserRepo().readUser(bluetoothController.getSelfHash(), user -> {
+            currentUser = user;
+            ((TextView) findViewById(R.id.current_user)).setText(user.getName());
+        });
         discovery();
         initRecyclerView();
     }
