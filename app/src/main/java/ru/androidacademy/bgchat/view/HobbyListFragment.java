@@ -5,20 +5,20 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.androidacademy.bgchat.App;
 import ru.androidacademy.bgchat.R;
+import ru.androidacademy.bgchat.model.User;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,23 +39,28 @@ public class HobbyListFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private HobbiesCallback callback;
+
+    public static HobbyListFragment newInstance() {
+        return new HobbyListFragment();
+    }
+
     public HobbyListFragment() {
         // Required empty public constructor
     }
 
-    public static HobbyListFragment newInstance() {
-        HobbyListFragment fragment = new HobbyListFragment();
-        /*Bundle args = new Bundle();
-        args.putParcelableArrayList(ARG_HOBBY_LIST, hobbyList);
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);*/
-        return fragment;
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof HobbiesCallback) {
+            callback = (HobbiesCallback) context;
+        }
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onDetach() {
+        super.onDetach();
+        callback = null;
     }
 
     @Override
@@ -74,19 +79,31 @@ public class HobbyListFragment extends Fragment {
         recyclerView.setAdapter(hobbiesAdapter);
 
         acceptFab = rootView.findViewById(R.id.hobbyAcceptFab);
-        acceptFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getContext(), "Accept!", Toast.LENGTH_SHORT).show();
-                for (String hobby:
-                     hobbiesAdapter.getSelectedHobbyList()) {
-                    Log.d(HOBBY_TAG, hobby);
-                }
+        acceptFab.setOnClickListener(v -> {
+            App app = (App) getActivity().getApplicationContext();
+            List<String> list = hobbiesAdapter.getSelectedHobbyList();
+            String id = app.getBluetoothController().getSelfHash();
+            if (id == null) {
+                // TODO what to do
+                throw new RuntimeException("hash id is null");
             }
+            FirebaseUser firebaseUser = app.getAuthRepo().getCurrentUser();
+            User user = new User(firebaseUser.getEmail(), id, firebaseUser.getDisplayName());
+            user.setHobbies(new ArrayList<>(list));
+            app.getUserRepo().writeUser(user);
+            callback.onFinished();
         });
 
         return rootView;
+    }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    public interface HobbiesCallback {
+        void onFinished();
     }
 
     public List<String> getHobbyList() {
@@ -141,6 +158,7 @@ public class HobbyListFragment extends Fragment {
         mListener = null;
     }
 */
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated

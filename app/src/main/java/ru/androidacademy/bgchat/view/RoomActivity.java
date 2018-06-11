@@ -25,13 +25,6 @@ public class RoomActivity extends AppCompatActivity {
     private User currentUser;
     private Room currentRoom;
 
-    public static void start(Activity activity, String room, String user) {
-        Intent intent = new Intent(activity, RoomActivity.class);
-        intent.putExtra(ROOM_KEY, room);
-        intent.putExtra(USER_KEY, user);
-        activity.startActivity(intent);
-    }
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,5 +64,12 @@ public class RoomActivity extends AppCompatActivity {
         });
         recyclerView.setAdapter(adapter);
         app.getRoomRepo().subscribeMessages(room, adapter::pushMessage);
+    }
+
+    public static void start(Activity activity, String room, String user) {
+        Intent intent = new Intent(activity, RoomActivity.class);
+        intent.putExtra(ROOM_KEY, room);
+        intent.putExtra(USER_KEY, user);
+        activity.startActivity(intent);
     }
 }
