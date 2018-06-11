@@ -9,9 +9,11 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import ru.androidacademy.bgchat.App;
@@ -25,8 +27,6 @@ import static ru.androidacademy.bgchat.bluetooth.BluetoothController.BLUETOOTH_T
 public class MainActivity extends AppCompatActivity implements HobbyListFragment.HobbiesCallback {
     private static final int RC_SIGN_IN = 3212;
     private static final String TAG = MainActivity.class.getSimpleName();
-
-    private RecyclerView chatsRecyclerView;
 
     private App app;
     private User currentUser;
@@ -87,12 +87,7 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
             Log.d(BLUETOOTH_TAG, "Self bluetooth hash: " + bluetoothController.getSelfHash());
             Log.d(BLUETOOTH_TAG, "Self bluetooth addr: " + bluetoothController.getSelfBluetoothMacAddress());
 
-            app.getUserRepo().readUser(bluetoothController.getSelfHash(), user -> {
-                currentUser = user;
-                ((TextView) findViewById(R.id.current_user)).setText(user.getName());
-            });
-            discovery();
-            initRecyclerView();
+            showChatList();
         }
     }
 
@@ -112,11 +107,11 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
     }
 
     public void initRecyclerView() {
-
-        chatsRecyclerView = findViewById(R.id.chatsRecyclerView);
+        RecyclerView chatsRecyclerView = findViewById(R.id.chatsRecyclerView);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         chatsRecyclerView.setLayoutManager(layoutManager);
+        chatsRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         adapter = new ChatsAdapter((chat, position) -> {
             Log.d(TAG, "Click chat: " + chat.getName());
@@ -124,7 +119,6 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
                     RoomActivity.start(MainActivity.this, room, currentUser.getId()));
         });
         chatsRecyclerView.setAdapter(adapter);
-
     }
 
     private void selectHobbies() {
@@ -149,12 +143,20 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
                 .remove(fragment)
                 .commit();
 
+        showChatList();
+    }
+
+    private void showChatList() {
+        findViewById(R.id.bg_chat_header).setVisibility(View.VISIBLE);
+
+        initRecyclerView();
+
         app.getUserRepo().readUser(bluetoothController.getSelfHash(), user -> {
             currentUser = user;
             ((TextView) findViewById(R.id.current_user)).setText(user.getName());
         });
+
         discovery();
-        initRecyclerView();
     }
 
     private void discovery() {
