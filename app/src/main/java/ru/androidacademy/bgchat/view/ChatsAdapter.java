@@ -13,6 +13,7 @@ import java.util.List;
 
 import android.support.v7.widget.RecyclerView.Adapter;
 import ru.androidacademy.bgchat.R;
+import ru.androidacademy.bgchat.model.User;
 import ru.androidacademy.bgchat.views.HobieTextView;
 
 /**
@@ -22,19 +23,19 @@ import ru.androidacademy.bgchat.views.HobieTextView;
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ItemHolder> {
 
     //List<Chat> chatList = new ArrayList<>();
-    private List<Chat> chatList;
+    private List<User> chatList;
     private OnItemClickListener onItemClickListener;
 
     private final View.OnClickListener internalClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            Chat chat = (Chat) view.getTag();
-            int position = chatList.indexOf(chat);
-            onItemClickListener.onClick(chat, position);
+            User user = (User) view.getTag();
+            int position = chatList.indexOf(user);
+            onItemClickListener.onClick(user, position);
         }
     };
 
-    public ChatsAdapter(List<Chat> chatList, OnItemClickListener onItemClickListener) {
+    public ChatsAdapter(List<User> chatList, OnItemClickListener onItemClickListener) {
         this.chatList = chatList;
         this.onItemClickListener = onItemClickListener;
     }
@@ -47,19 +48,24 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ItemHolder> 
         return new ItemHolder(itemView);
     }
 
-    public void addChat(Chat chat) {
+    public void addChat(User chat) {
         chatList.add(chat);
         notifyDataSetChanged();
     }
 
     @Override
     public void onBindViewHolder(@NonNull ItemHolder holder, int position) {
-        Chat chat = chatList.get(position);
+        User chat = chatList.get(position);
         holder.itemView.setTag(chat);
         //TODO: add loading avatar via Picasso
-        holder.userNameTextView.setText(chat.getUserName());
-        holder.firstHobbyTextView.setText(chat.getFirstHobby());
-        holder.secondHobbyTextView.setText(chat.getSecondHobby());
+        holder.userNameTextView.setText(chat.getName());
+        List<String> hobbies = chat.getHobbies();
+        if (hobbies.size() > 0) {
+            holder.firstHobbyTextView.setText(chat.getHobbies().get(0));
+        }
+        if (hobbies.size() > 1) {
+            holder.secondHobbyTextView.setText(chat.getHobbies().get(1));
+        }
     }
 
     @Override
@@ -68,17 +74,17 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ItemHolder> 
     }
 
     public interface OnItemClickListener {
-        public void onClick(Chat chat, int position);
+        public void onClick(User chat, int position);
     }
 
     class ItemHolder extends RecyclerView.ViewHolder {
 
-        public HobieTextView firstHobbyTextView;
-        public HobieTextView secondHobbyTextView;
-        public TextView userNameTextView;
-        public ImageView avatarImageView;
+        HobieTextView firstHobbyTextView;
+        HobieTextView secondHobbyTextView;
+        TextView userNameTextView;
+        ImageView avatarImageView;
 
-        public ItemHolder(View itemView) {
+        ItemHolder(View itemView) {
             super(itemView);
             firstHobbyTextView = itemView.findViewById(R.id.hobbyFirstTextView);
             secondHobbyTextView = itemView.findViewById(R.id.hobbySecondTextView);
@@ -86,7 +92,6 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ItemHolder> 
             avatarImageView = itemView.findViewById(R.id.avatarImageView);
             itemView.setOnClickListener(internalClickListener);
         }
-
     }
 
 }

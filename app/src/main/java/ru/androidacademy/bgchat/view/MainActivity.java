@@ -35,6 +35,9 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
     private App app;
     private User currentUser;
 
+    private BluetoothController bluetoothController;
+    private ChatsAdapter adapter;
+
     private final BluetoothController.Callback callback = new BluetoothController.Callback() {
         @Override
         public boolean requestPermission() {
@@ -60,18 +63,11 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
             Log.d(BLUETOOTH_TAG, "FOUND DEVICE: " + deviceHash);
             app.getUserRepo().readUser(deviceHash, foundUser -> {
                 if (foundUser != null) {
-                    TextView textView = findViewById(R.id.user_text);
-                    textView.setText(foundUser.getName());
-                    Toast.makeText(MainActivity.this, foundUser.getName(), Toast.LENGTH_SHORT).show();
-                    textView.setOnClickListener(view ->
-                            app.getRoomRepo().createRoom(currentUser, foundUser, room ->
-                                    RoomActivity.start(MainActivity.this, room, currentUser.getId())));
+                    adapter.addChat(foundUser);
                 }
             });
         }
     };
-
-    private BluetoothController bluetoothController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
         app = (App) getApplicationContext();
         bluetoothController = app.getBluetoothController();
         bluetoothController.setCallback(callback);
-        /*
+
         if (app.getAuthRepo().getCurrentUser() == null) {
             startActivityForResult(app.getAuthRepo().getIntent(), RC_SIGN_IN);
         } else {
@@ -93,12 +89,12 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
             bluetoothController.enableDiscoverability(this);
             bluetoothController.discovery();
             // TODO : show chats
-        }*/
+            ProgressBar progressBar = findViewById(R.id.chatsUpdateProgressBar);
+            progressBar.setVisibility(View.INVISIBLE);
+            initRecyclerView();
+        }
 
-        ProgressBar progressBar = findViewById(R.id.chatsUpdateProgressBar);
-        progressBar.setVisibility(View.INVISIBLE);
 
-        initRecyclerView();
     }
 
     @Override
@@ -123,25 +119,13 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         chatsRecyclerView.setLayoutManager(layoutManager);
 
-        ChatsAdapter chatsAdapter = new ChatsAdapter(getChats(), new ChatsAdapter.OnItemClickListener() {
-            @Override
-            public void onClick(Chat chat, int position) {
-                Log.d(TAG, "Click chat: " + chat.getUserName());
-            }
-        });
-        chatsRecyclerView.setAdapter(chatsAdapter);
-
-    }
-
-    private List<Chat> getChats() {
-        List<Chat> chatList = new ArrayList<>();
-
-        chatList.add(new Chat("NO LINK", "Name1", "ololo11", "ololo22"));
-        chatList.add(new Chat("NO LINK", "Name2", "ololo33", "ololo44"));
-        chatList.add(new Chat("NO LINK", "Name3", "ololo55", "ololo66"));
-        chatList.add(new Chat("NO LINK", "Name4", "ololo77", "ololo88"));
-
-        return chatList;
+        adapter = new ChatsAdapter(new ArrayList<>(),
+                (chat, position) -> {
+                    Log.d(TAG, "Click chat: " + chat.getName());
+                    app.getRoomRepo().createRoom(currentUser, chat, room ->
+                            RoomActivity.start(MainActivity.this, room, currentUser.getId()));
+                });
+        chatsRecyclerView.setAdapter(adapter);
 
     }
 
