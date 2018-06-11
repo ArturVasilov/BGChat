@@ -10,6 +10,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,19 +47,56 @@ public class RoomRepo {
                 });
     }
 
-    public String createRoom(User user1, User user2) {
+    public void createRoom(User user1, User user2, Consumer<String> consumer) {
         String roomId = interceptRooms(user1.getRooms(), user2.getRooms());
         if (roomId != null) {
-            return roomId;
+            consumer.accept(roomId);
         }
-        String key = db.getReference().child(REF_ROOMS).push().getKey();
-        Room room = new Room(key, user1.getId(), user2.getId());
-        user1.addRoom(room.getId());
-        user2.addRoom(room.getId());
-        userRepo.writeUser(user1);
-        userRepo.writeUser(user2);
-        writeRoom(room);
-        return room.getId();
+        List<User> list = new ArrayList<>();
+        userRepo.readUser(user1.getId(), user -> {
+            synchronized (list) {
+                list.add(user);
+            }
+            if (list.size() == 2) {
+                User u1 = list.get(0);
+                User u2 = list.get(1);
+                String roomIdd = interceptRooms(u1.getRooms(), u2.getRooms());
+                if (roomIdd != null) {
+                    consumer.accept(roomIdd);
+                } else {
+                    String key = db.getReference().child(REF_ROOMS).push().getKey();
+                    Room room = new Room(key, u1.getId(), u2.getId());
+                    userRepo.writeUser(u1);
+                    userRepo.writeUser(u2);
+                    u1.addRoom(room.getId());
+                    u2.addRoom(room.getId());
+                    writeRoom(room);
+                    consumer.accept(key);
+                }
+            }
+        });
+        userRepo.readUser(user2.getId(), user -> {
+            synchronized (list) {
+                list.add(user);
+            }
+            if (list.size() == 2) {
+                String key = db.getReference().child(REF_ROOMS).push().getKey();
+                User u1 = list.get(0);
+                User u2 = list.get(1);
+                String roomIdd = interceptRooms(u1.getRooms(), u2.getRooms());
+                if (roomIdd != null) {
+                    consumer.accept(roomIdd);
+                } else {
+                    Room room = new Room(key, u1.getId(), u2.getId());
+                    u1.addRoom(room.getId());
+                    u2.addRoom(room.getId());
+                    userRepo.writeUser(u1);
+                    userRepo.writeUser(u2);
+                    writeRoom(room);
+                    consumer.accept(key);
+                }
+            }
+        });
     }
 
     public void readRoom(String id, Consumer<Room> consumer) {

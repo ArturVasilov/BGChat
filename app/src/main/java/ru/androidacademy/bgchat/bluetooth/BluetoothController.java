@@ -1,5 +1,6 @@
 package ru.androidacademy.bgchat.bluetooth;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -113,7 +114,7 @@ public class BluetoothController {
     }
 
     public boolean enable() {
-        localContext.registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
+        //localContext.registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
         return bluetoothAdapter.enable();
     }
 
@@ -127,6 +128,7 @@ public class BluetoothController {
             throw new IllegalStateException("Set callback before");
         }
         if (!bluetoothAdapter.isEnabled()) {
+            enable();
             callback.startBluetoothSettingsActivity();
         }
     }
@@ -160,6 +162,14 @@ public class BluetoothController {
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public void enableDiscoverability(Activity activity) {
+        if (bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            activity.startActivity(discoverableIntent);
         }
     }
 

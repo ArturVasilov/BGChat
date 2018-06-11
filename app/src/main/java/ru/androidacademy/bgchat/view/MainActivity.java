@@ -54,10 +54,9 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
                     TextView textView = findViewById(R.id.user_text);
                     textView.setText(foundUser.getName());
                     Toast.makeText(MainActivity.this, foundUser.getName(), Toast.LENGTH_SHORT).show();
-                    textView.setOnClickListener(view -> {
-                        String room = app.getRoomRepo().createRoom(currentUser, foundUser);
-                        RoomActivity.start(MainActivity.this, room, currentUser.getId());
-                    });
+                    textView.setOnClickListener(view ->
+                            app.getRoomRepo().createRoom(currentUser, foundUser, room ->
+                                    RoomActivity.start(MainActivity.this, room, currentUser.getId())));
                 }
             });
         }
@@ -81,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
 
             app.getUserRepo().readUser(bluetoothController.getSelfHash(), user -> currentUser = user);
             bluetoothController.enableDeviceRequest();
+            bluetoothController.enableDiscoverability(this);
             bluetoothController.discovery();
             // TODO : show chats
         }
