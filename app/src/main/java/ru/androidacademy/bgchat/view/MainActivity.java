@@ -7,9 +7,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import ru.androidacademy.bgchat.App;
 import ru.androidacademy.bgchat.R;
@@ -22,6 +29,8 @@ import static ru.androidacademy.bgchat.bluetooth.BluetoothController.BLUETOOTH_T
 public class MainActivity extends AppCompatActivity implements HobbyListFragment.HobbiesCallback {
     private static final int RC_SIGN_IN = 3212;
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private RecyclerView chatsRecyclerView;
 
     private App app;
     private User currentUser;
@@ -72,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
         app = (App) getApplicationContext();
         bluetoothController = app.getBluetoothController();
         bluetoothController.setCallback(callback);
+        /*
         if (app.getAuthRepo().getCurrentUser() == null) {
             startActivityForResult(app.getAuthRepo().getIntent(), RC_SIGN_IN);
         } else {
@@ -83,7 +93,12 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
             bluetoothController.enableDiscoverability(this);
             bluetoothController.discovery();
             // TODO : show chats
-        }
+        }*/
+
+        ProgressBar progressBar = findViewById(R.id.chatsUpdateProgressBar);
+        progressBar.setVisibility(View.INVISIBLE);
+
+        initRecyclerView();
     }
 
     @Override
@@ -99,6 +114,35 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
                 // TODO next action?
             }
         }
+    }
+
+    public void initRecyclerView() {
+
+        chatsRecyclerView = findViewById(R.id.chatsRecyclerView);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        chatsRecyclerView.setLayoutManager(layoutManager);
+
+        ChatsAdapter chatsAdapter = new ChatsAdapter(getChats(), new ChatsAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(Chat chat, int position) {
+                Log.d(TAG, "Click chat: " + chat.getUserName());
+            }
+        });
+        chatsRecyclerView.setAdapter(chatsAdapter);
+
+    }
+
+    private List<Chat> getChats() {
+        List<Chat> chatList = new ArrayList<>();
+
+        chatList.add(new Chat("NO LINK", "Name1", "ololo11", "ololo22"));
+        chatList.add(new Chat("NO LINK", "Name2", "ololo33", "ololo44"));
+        chatList.add(new Chat("NO LINK", "Name3", "ololo55", "ololo66"));
+        chatList.add(new Chat("NO LINK", "Name4", "ololo77", "ololo88"));
+
+        return chatList;
+
     }
 
     private void selectHobbies() {
