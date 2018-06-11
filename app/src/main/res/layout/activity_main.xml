@@ -39,6 +39,21 @@
             android:textSize="24sp"
             tools:text="Nail Khafizov"/>
 
+        <TextView
+            android:id="@+id/ErrorMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/bgfont"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:visibility="gone"
+            tools:text="Error Text" />
+
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/swipe_refresh"
             android:layout_width="match_parent"
@@ -53,6 +68,7 @@
             </android.support.v7.widget.RecyclerView>
 
         </android.support.v4.widget.SwipeRefreshLayout>
+
     </LinearLayout>
 
     <FrameLayout
