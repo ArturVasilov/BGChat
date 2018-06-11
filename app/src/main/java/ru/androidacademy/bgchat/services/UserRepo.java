@@ -46,6 +46,7 @@ public class UserRepo {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
+                        consumer.accept(null);
                     }
                 });
     }

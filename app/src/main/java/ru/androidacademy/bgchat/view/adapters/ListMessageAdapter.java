@@ -14,9 +14,11 @@ import ru.androidacademy.bgchat.model.Message;
 
 public class ListMessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
     private final List<Message> messages;
+    private final String user;
 
-    public ListMessageAdapter() {
+    public ListMessageAdapter(String user) {
         this.messages = new ArrayList<>();
+        this.user = user;
     }
 
     @NonNull
@@ -29,7 +31,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<MessageViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Message message = messages.get(position);
-        holder.applyData(message.getAuthorName(), message.getMessage());
+        holder.applyData(message.getMessage(), message.getAuthor().equals(user));
     }
 
     @Override
