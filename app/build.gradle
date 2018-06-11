@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 27
@@ -41,6 +42,8 @@ dependencies {
     implementation "com.android.support:appcompat-v7:${project.property('supportLib.version')}"
     implementation "com.android.support:design:${project.property('supportLib.version')}"
     implementation "com.android.support:recyclerview-v7:${project.property('supportLib.version')}"
+
+    implementation 'com.google.android:flexbox:1.0.0'
 
     implementation "com.google.firebase:firebase-core:${project.property('firebase.version')}"
     implementation "com.google.firebase:firebase-auth:${project.property('firebase.auth.version')}"

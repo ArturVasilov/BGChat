@@ -17,7 +17,7 @@ import ru.androidacademy.bgchat.R;
  */
 public class HobieTextView extends AppCompatTextView {
 
-    private static final int ANIMATION_DURATION = 150;
+    private static final int ANIMATION_DURATION = 200;
 
     private boolean isSelected = false;
 
