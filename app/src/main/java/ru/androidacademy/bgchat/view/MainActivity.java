@@ -15,6 +15,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import ru.androidacademy.bgchat.App;
 import ru.androidacademy.bgchat.R;
@@ -33,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
 
     private BluetoothController bluetoothController;
     private ChatsAdapter adapter;
+
+    private TextView errorTv;
 
     private final BluetoothController.Callback callback = new BluetoothController.Callback() {
         @Override
@@ -64,6 +69,14 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
                 }
             });
         }
+
+        @Override
+        public void onFinishDiscovery() {
+            if (adapter != null && adapter.getItemCount() == 0) {
+                    errorTv.setVisibility(View.VISIBLE);
+                    errorTv.setText("Пичалька. Вы совсем одиноки...");
+            }
+        }
     };
 
     @Override
@@ -71,12 +84,15 @@ public class MainActivity extends AppCompatActivity implements HobbyListFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        errorTv = findViewById(R.id.ErrorMessage);
+
         app = (App) getApplicationContext();
         bluetoothController = app.getBluetoothController();
         bluetoothController.setCallback(callback);
 
         SwipeRefreshLayout refreshLayout = findViewById(R.id.swipe_refresh);
         refreshLayout.setOnRefreshListener(() -> {
+            errorTv.setVisibility(View.GONE);
             discovery();
             new Handler().postDelayed(() -> refreshLayout.setRefreshing(false), 1000);
         });

@@ -88,6 +88,9 @@ public class BluetoothController {
                             Log.d(BLUETOOTH_TAG, ": " + element);
                         }
                     }
+                    if (callback != null) {
+                        callback.onFinishDiscovery();
+                    }
                 }
             }
         };
@@ -209,6 +212,8 @@ public class BluetoothController {
         void startBluetoothSettingsActivity();
 
         void discoveryFoundedDeviceCallback(String deviceHash);
+
+        void onFinishDiscovery();
     }
 
 }
