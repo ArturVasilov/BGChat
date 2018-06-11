@@ -3,6 +3,7 @@ package ru.androidacademy.bgchat.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class User {
     private String email;
@@ -22,6 +23,20 @@ public class User {
     public User() {
         this.hobbies = new ArrayList<>();
         this.rooms = new ArrayList<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
     }
 
     public void addRoom(String room) {
