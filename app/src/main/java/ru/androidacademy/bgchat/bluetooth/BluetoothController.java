@@ -1,14 +1,11 @@
 package ru.androidacademy.bgchat.bluetooth;
 
-import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,6 +16,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.androidacademy.bgchat.BuildConfig;
+
 /**
  * Created by User on 10.06.2018.
  */
@@ -28,12 +27,18 @@ public class BluetoothController {
     public static final String BLUETOOTH_TAG = "Bluetooth";
     public static final int BLUETOOTH_ENABLE_REQUEST = 123;
 
-    public BluetoothController(boolean debug_mode, AppCompatActivity activity, Callback callback) {
+    private static final boolean DEBUG_MODE = BuildConfig.DEBUG;
+    private Callback callback;
+    private BluetoothAdapter bluetoothAdapter;
+    private Context localContext;
+    private BroadcastReceiver bluetoothBroadcastReceiver;
+    private IntentFilter bluetoothIntentFilter;
+    private List<String> mDiscoveredDevicesList;
+
+    public BluetoothController(Context context) {
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        DEBUG_MODE = debug_mode;
-        LocalActivity = activity;
-        discoveryCallback = callback;
+        localContext = context;
 
         mDiscoveredDevicesList = new ArrayList<>();
 
@@ -49,10 +54,7 @@ public class BluetoothController {
 
                         String devName = device.getName();
                         String devMAC = device.getAddress();
-                        String devSHA1 = "0";
-                        if (devName != null) {
-                            devSHA1 = AeSimpleSHA1.SHA1(devName);
-                        }
+                        String devSHA1 = AeSimpleSHA1.SHA1(devMAC);
 
                         if (DEBUG_MODE) {
                             Log.d(BLUETOOTH_TAG, "Найдено устройство: " + devName + " " + devMAC +
@@ -61,7 +63,9 @@ public class BluetoothController {
 
                         if (!mDiscoveredDevicesList.contains(devSHA1)) {
                             mDiscoveredDevicesList.add(devSHA1);
-                            discoveryCallback.discoveryFoundedDeviceCallback(devSHA1);
+                            if (callback != null) {
+                                callback.discoveryFoundedDeviceCallback(devSHA1);
+                            }
                         }
 
                     } catch (NoSuchAlgorithmException e) {
@@ -83,10 +87,6 @@ public class BluetoothController {
                             Log.d(BLUETOOTH_TAG, ": " + element);
                         }
                     }
-
-                    if (discoveryCallback != null) {
-                        discoveryCallback.discoveryFinishedCallback(mDiscoveredDevicesList);
-                    }
                 }
             }
         };
@@ -97,18 +97,12 @@ public class BluetoothController {
         bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         //bluetoothIntentFilter.addAction(BluetoothDevice.ACTION_UUID);
 
-        LocalActivity.registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
-
+        localContext.registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
     }
 
-    private Callback discoveryCallback;
-    private BluetoothAdapter bluetoothAdapter;
-    private AppCompatActivity LocalActivity;
-    private BroadcastReceiver bluetoothBroadcastReceiver;
-    private IntentFilter bluetoothIntentFilter;
-
-    private boolean DEBUG_MODE = true;
-    private List<String> mDiscoveredDevicesList;
+    public void setCallback(Callback callback) {
+        this.callback = callback;
+    }
 
     public boolean isEnabled() {
         return bluetoothAdapter.isEnabled();
@@ -118,33 +112,29 @@ public class BluetoothController {
         return bluetoothAdapter;
     }
 
-    public boolean Enable() {
-
-        LocalActivity.registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
-
+    public boolean enable() {
+        localContext.registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
         return bluetoothAdapter.enable();
     }
 
     public boolean destroy() {
-
-        LocalActivity.unregisterReceiver(bluetoothBroadcastReceiver);
-
+        localContext.unregisterReceiver(bluetoothBroadcastReceiver);
         return bluetoothAdapter.disable();
     }
 
     public void enableDeviceRequest() {
-
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            LocalActivity.startActivityForResult(enableIntent, BLUETOOTH_ENABLE_REQUEST);
+        if (callback == null) {
+            throw new IllegalStateException("Set callback before");
         }
-
+        if (!bluetoothAdapter.isEnabled()) {
+            callback.startBluetoothSettingsActivity();
+        }
     }
 
     public String getSelfBluetoothMacAddress() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         String bluetoothMacAddress = "";
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             try {
                 Field mServiceField = bluetoothAdapter.getClass().getDeclaredField("mService");
                 mServiceField.setAccessible(true);
@@ -154,14 +144,8 @@ public class BluetoothController {
                 if (btManagerService != null) {
                     bluetoothMacAddress = (String) btManagerService.getClass().getMethod("getAddress").invoke(btManagerService);
                 }
-            } catch (NoSuchFieldException e) {
-
-            } catch (NoSuchMethodException e) {
-
-            } catch (IllegalAccessException e) {
-
-            } catch (InvocationTargetException e) {
-
+            } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
             }
         } else {
             bluetoothMacAddress = bluetoothAdapter.getAddress();
@@ -179,25 +163,18 @@ public class BluetoothController {
         }
     }
 
-    @TargetApi(23)
-    private void checkBTPermissions() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-            int permissionCheck = LocalActivity.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
-            permissionCheck += LocalActivity.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
-            if (permissionCheck != 0) {
-                LocalActivity.requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1001);
-            }
-        }
-    }
-
     public boolean discovery() {
-
-        checkBTPermissions();
+        if (callback == null) {
+            throw new IllegalStateException("Set callback before");
+        }
+        if (!callback.requestPermission()) {
+            return false;
+        }
 
         if (bluetoothAdapter.isDiscovering()) {
             if (DEBUG_MODE) {
                 Log.d(BLUETOOTH_TAG, "Процесс обнаружения уже запущен!");
-                Toast.makeText(LocalActivity, "Процесс сканирования чатов уже запущен", Toast.LENGTH_LONG).show();
+                Toast.makeText(localContext, "Процесс сканирования чатов уже запущен", Toast.LENGTH_LONG).show();
             }
             //bluetoothAdapter.cancelDiscovery();
             return false;
@@ -217,7 +194,9 @@ public class BluetoothController {
     }
 
     public interface Callback {
-        void discoveryFinishedCallback(List<String> DiscoveredDeviceList);
+        boolean requestPermission();
+
+        void startBluetoothSettingsActivity();
 
         void discoveryFoundedDeviceCallback(String deviceHash);
     }
